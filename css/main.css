@@ -32,3 +32,11 @@ canvas {
 	float: left;
 	border: 1px solid #000;
 }
+.micGainFxEmu {
+	height: 100px;
+	background: #ccc;
+	border: 1px solid #000;
+	margin: 5px;
+	padding: 5px;
+	font-size: 14px;
+}

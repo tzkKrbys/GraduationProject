@@ -63,6 +63,7 @@ $(document).ready(function(){
 		context.clearRect(0,0,canvas_w,canvas_h);// 塗りつぶし。CanvasRenderingContext2Dオブジェクト
 		my_icon.Draw(context,my_icon_tex,0,0); //my_iconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,イメージオブジェクト,0,0)
 		my_icon.DrawChat(); //my_iconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,str)
+		voice();
 	}
 
 
@@ -248,7 +249,7 @@ $(document).ready(function(){
 	My_icon.prototype.Draw = function(img,tex,offsetX,offSetY){ //引数 … CanvasRenderingContext2Dオブジェクト,イメージオブジェクト,0,0
 		img.save(); //現在の描画スタイル状態を一時的に保存//context . save() 現在の状態をスタックの最後に加えます。
 		img.transform(-1, 0, 0, 1, 0, 0);//context . transform(m11, m12, m21, m22, dx, dy)下記の通りに引数に指定されたマトリックスを適用して、変換マトリックスを変更します。
-		img.drawImage(tex, 0, 0, 160, 160, -this.PosX - this.radius, this.PosY - this.radius, this.radius * 2, this.radius * 2);//drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh)
+		img.drawImage(tex, 0, 0, 160, 160, -this.PosX - this.radius, this.PosY - this.radius, this.radius * 2, this.radius * 2);//drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
 		img.restore();//context . restore() スタックの最後の状態を抜き出し、その状態をコンテキストに復元します。
 	}
 
@@ -321,4 +322,26 @@ $(document).ready(function(){
 			$.noop();//何もしないことを明示的に記述
 		}
 	});
+	
+	var countVoice;
+	function voice() {
+		if(countVoice){
+			context.globalAlpha = countVoice * 3 / 1000;
+			context.fillStyle = "#ff0";
+			context.beginPath();
+			//円の設定（X中心軸,Y中心軸、半径、円のスタート度、円のエンド度、回転）
+			//		context.arc(oldX, oldY, Math.sqrt(Math.pow(px, 2) + Math.pow(py, 2)), 0, Math.PI * 2, false); // full circle
+			context.arc(my_icon.PosX, my_icon.PosY, 140, 0, Math.PI * 2, false); // full circle
+			context.fill();
+			context.globalAlpha = 1;
+			countVoice--;
+		}
+	}
+	$('.micGainFxEmu').on("click",function(){
+		countVoice = 100;
+	});
+	
+	
+	
+	
 });
