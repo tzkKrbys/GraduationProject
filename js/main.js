@@ -27,10 +27,8 @@ $(document).ready(function(){
 			return false;
 		}
 
-
-
 		// クラス生成
-		my_icon = new My_icon();		// マリオクラス
+		my_icon = new My_icon();		// クラス
 		my_icon.Init( canvas_w/2, canvas_h/2 ); //初期化メソッド実行(初期の位置を引数に渡してcanvas要素中央に配置)
 
 		LoadTex();           // texture load//imgのオブジェクトを生成
@@ -43,7 +41,6 @@ $(document).ready(function(){
 		canvas.onmousemove = drag;
 		canvas.onmouseup = endDrag;
 	};
-
 
 
 	//	LoadTex
@@ -65,7 +62,7 @@ $(document).ready(function(){
 		context.fillStyle = "rgb(255,255,255)";// 黒に設定。CanvasRenderingContext2Dオブジェクト
 		context.clearRect(0,0,canvas_w,canvas_h);// 塗りつぶし。CanvasRenderingContext2Dオブジェクト
 		my_icon.Draw(context,my_icon_tex,0,0); //my_iconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,イメージオブジェクト,0,0)
-		my_icon.DrawChat(str); //my_iconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,str)
+		my_icon.DrawChat(); //my_iconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,str)
 	}
 
 
@@ -226,7 +223,6 @@ $(document).ready(function(){
 
 	//My_iconクラス
 	function My_icon(){
-		// 変数(座標)
 		this.PosX;					// x座標
 		this.PosY;					// y座標
 		this.AddNumX;				// x座標移動加算量
@@ -236,6 +232,8 @@ $(document).ready(function(){
 		this.relY;					// 円の中心とマウスの相対位置
 		this.dragging = false;//ドラッグ中かどうか
 		this.onObj = false;//マウスがアイコンに乗っかってるかどうか
+		this.chatShowCount;
+		this.str;
 	}
 
 	/*初期化関数*/
@@ -287,8 +285,8 @@ $(document).ready(function(){
 	}
 	//チャットの文字描画の為のメソッド
 	My_icon.prototype.DrawChat = function(str){
-		if(chatShowCount > 0){
-			chatShowCount--;
+		if(this.chatShowCount > 0){
+			this.chatShowCount--;
 			//カラー指定
 			context.fillStyle = '#fff';
 			//fontサイズ、書式
@@ -297,31 +295,27 @@ $(document).ready(function(){
 			//文字の設置位置
 			context.textBaseline = "top"; //top,middle,bottom...
 			//表示文字と座標
-			context.fillText(str, this.PosX, this.PosY); //ctx.fillText(文字列,x,y)
+			context.fillText(this.str, this.PosX, this.PosY); //ctx.fillText(文字列,x,y)
 		}
 	}
 
-	var str;
-	var chatShowCount;
-
-	$('#button').on("click",function(){
-
-		str = $('textarea').val();
-		my_icon.DrawChat(str);
-		chatShowCount = 500;
+	function chatSend() {
+		my_icon.str = $('textarea').val();
+		my_icon.DrawChat();
+		my_icon.chatShowCount = 500;
 		$('textarea').val("");
 		return false;
+	}
+
+	$('#button').on("click",function(){
+		chatSend();
 	});
 
 	$(document).on("keydown", function(e) {
 		if (e.keyCode == 13) { // Enterが押された
 			$.noop();//何もしないことを明示的に記述
 			if (e.shiftKey) { // Shiftキーも押された
-				str = $('textarea').val();
-				my_icon.DrawChat(str);
-				chatShowCount = 500;
-				$('textarea').val("");
-				return false;
+				chatSend();
 			}
 		} else {
 			$.noop();//何もしないことを明示的に記述
