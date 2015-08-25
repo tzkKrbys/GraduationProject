@@ -51,7 +51,31 @@ $(document).ready(function(){
 	}
 
 	function animate(now) {//レンダリング関数
+		//符号なし8bitArrayを生成
+		var data = new Uint8Array(analyser.frequencyBinCount);
+		//周波数データ
+		analyser.getByteFrequencyData(data);
+		//console.log(data);
+		var volume = false;
+		for(var i = 0; i < data.length; ++i) {
+			//上部の描画
+			//			context2.fillRect(i*5, 0, 5, data[i]*2);
+			//下部の描画
+			//			context2.fillRect(i*5, h, 5, -data[i]*2);
+			//console.log( data[i] > 100 );
+
+			if(data[i] > 200){
+				volume = true;
+			}
+		}
+		if( volume ){
+			my_icon.countVoice = 100;
+		}
+		
+		
+		
 		Draw();		// 描画
+		
 		my_icon.Move(g_bRightPush,g_bLeftPush,g_bUpPush,g_bDownPush);//アイコンを動かす
 		requestNextAnimationFrame(animate);//描画がloopする
 	}
@@ -63,9 +87,21 @@ $(document).ready(function(){
 		context.clearRect(0,0,canvas_w,canvas_h);// 塗りつぶし。CanvasRenderingContext2Dオブジェクト
 		my_icon.Draw(context,my_icon_tex,0,0); //my_iconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,イメージオブジェクト,0,0)
 		my_icon.DrawChat(); //my_iconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,str)
-		voice();
+		if(my_icon.countVoice){
+			context.globalAlpha = my_icon.countVoice * 3 / 1000;
+			context.fillStyle = "#ff0";
+			context.beginPath();
+			//円の設定（X中心軸,Y中心軸、半径、円のスタート度、円のエンド度、回転）
+			//		context.arc(oldX, oldY, Math.sqrt(Math.pow(px, 2) + Math.pow(py, 2)), 0, Math.PI * 2, false); // full circle
+			context.arc(my_icon.PosX, my_icon.PosY, 140, 0, Math.PI * 2, false); // full circle
+			context.fill();
+			context.globalAlpha = 1;
+			my_icon.countVoice--;
+		}
 	}
-
+	$('.micGainFxEmu').on("click",function(){
+		my_icon.countVoice = 100;
+	});
 
 	//キーを押した時
 	function KeyDown(event) {
@@ -235,6 +271,7 @@ $(document).ready(function(){
 		this.onObj = false;//マウスがアイコンに乗っかってるかどうか
 		this.chatShowCount;
 		this.str;
+		this.countVoice;
 	}
 
 	/*初期化関数*/
@@ -323,25 +360,44 @@ $(document).ready(function(){
 		}
 	});
 	
-	var countVoice;
-	function voice() {
-		if(countVoice){
-			context.globalAlpha = countVoice * 3 / 1000;
-			context.fillStyle = "#ff0";
-			context.beginPath();
-			//円の設定（X中心軸,Y中心軸、半径、円のスタート度、円のエンド度、回転）
-			//		context.arc(oldX, oldY, Math.sqrt(Math.pow(px, 2) + Math.pow(py, 2)), 0, Math.PI * 2, false); // full circle
-			context.arc(my_icon.PosX, my_icon.PosY, 140, 0, Math.PI * 2, false); // full circle
-			context.fill();
-			context.globalAlpha = 1;
-			countVoice--;
+
+
+
+
+
+
+	var audioContext = new webkitAudioContext();
+	//フィルター
+	var filter = audioContext.createBiquadFilter();
+	filter.type = 0;
+	filter.frequency.value = 440;
+	//analyserオブジェクトの生成
+	var analyser = audioContext.createAnalyser();
+
+	function init(){
+		var audioObj = {"audio":true};
+		//エラー処理
+		var errBack = function(e){
+			console.log("Web Audio error:",e.code);
+		};
+		//WebAudioリクエスト成功時に呼び出されるコールバック関数
+		function gotStream(stream){
+			//streamからAudioNodeを作成
+			var mediaStreamSource = audioContext.createMediaStreamSource(stream);
+			mediaStreamSource.connect(filter);
+			filter.connect(analyser);
+			//出力Nodeのdestinationに接続
+			analyser.connect(audioContext.destination);
+			//mediaStreamSource.connect(audioContext.destination);
+		}
+		//マイクの有無を調べる
+		if(navigator.webkitGetUserMedia){
+			//マイク使って良いか聞いてくる
+			navigator.webkitGetUserMedia(audioObj,gotStream,errBack);
+		}else{
+			console.log("マイクデバイスがありません");
 		}
 	}
-	$('.micGainFxEmu').on("click",function(){
-		countVoice = 100;
-	});
-	
-	
-	
+	init();
 	
 });
