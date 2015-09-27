@@ -234,7 +234,7 @@ io.sockets.on('connection', function (socket) {
 //	});
 	
 	socket.on('emit_from_client_join', function(data) {
-		ids.push(data);
+		ids.push({data : data, PosX: 0, PosY: 0});
 		console.log(ids);
 		console.log(socket.id);
 		io.sockets.emit('emit_from_server_join', ids);

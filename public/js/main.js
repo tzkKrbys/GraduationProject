@@ -99,9 +99,7 @@ $(document).ready(function(){
 //	init();
 	socket = io.connect();
 	console.log('connectしました。');
-	// クラス生成
-	myIcon = new MyIcon();		// クラス
-	myIcon.Init( canvasWidth/2, canvasHeight/2 ); //初期化メソッド実行(初期の位置を引数に渡してcanvas要素中央に配置)
+	
 	
 	
 	
@@ -113,8 +111,12 @@ $(document).ready(function(){
 //	});
 
 	socket.on('connect', function() {
+		// クラス生成
+		myIcon = new MyIcon();		// クラス
+		myIcon.Init( canvasWidth/2, canvasHeight/2 ); //初期化メソッド実行(初期の位置を引数に渡してcanvas要素中央に配置)
 //		myUniqueId = socket.id;
-		socket.emit('emit_from_client_join', socket.id);
+		
+		//socket.emit('emit_from_client_join', {uniqueId:socket.id, pos});
 		socket.on('emit_from_server_join', function(data) {
 			console.log(data);
 		});
@@ -164,14 +166,20 @@ $(document).ready(function(){
 
 	//canvas要素にイベント設定----------------------s
 	canvas.onmousedown = function () {
-		myIcon.beginDrag();
+		if(myIcon) {
+			myIcon.beginDrag();
+		}
 	};
 	canvas.onmousemove = function () {
 		mousePos(event);//mouseX,mouseY座標を取得
-		myIcon.drag();
+		if(myIcon) {
+			myIcon.drag();
+		}
 	};
 	canvas.onmouseup = function () {
-		myIcon.endDrag();
+		if(myIcon) {
+			myIcon.endDrag();
+		}
 	};
 
 	//レンダリング関数-----------------------------------------------------
@@ -254,23 +262,27 @@ $(document).ready(function(){
 		function Draw(){
 			context.fillStyle = "rgb(255,255,255)";// 白に設定。CanvasRenderingContext2Dオブジェクト
 			context.clearRect(0,0,canvasWidth,canvasHeight);// 塗りつぶし。CanvasRenderingContext2Dオブジェクト
-			myIcon.Draw(context,0,0); //myIconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,イメージオブジェクト,0,0)
-			myIcon.DrawChat(); //myIconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,str)
-			if(myIcon.countVoice){
-				context.globalAlpha = myIcon.countVoice * 3 / 1000;
-				context.fillStyle = "#ff0";
-				context.beginPath();
-				//円の設定（X中心軸,Y中心軸、半径、円のスタート度、円のエンド度、回転）
-				//		context.arc(oldX, oldY, Math.sqrt(Math.pow(px, 2) + Math.pow(py, 2)), 0, Math.PI * 2, false); // full circle
-				context.arc(myIcon.PosX, myIcon.PosY, 140, 0, Math.PI * 2, false); // full circle
-				context.fill();
-				context.globalAlpha = 1;
-				myIcon.countVoice--;
+			if(myIcon) {
+				myIcon.Draw(context,0,0); //myIconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,イメージオブジェクト,0,0)
+				myIcon.DrawChat(); //myIconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,str)
+				if(myIcon.countVoice){
+					context.globalAlpha = myIcon.countVoice * 3 / 1000;
+					context.fillStyle = "#ff0";
+					context.beginPath();
+					//円の設定（X中心軸,Y中心軸、半径、円のスタート度、円のエンド度、回転）
+					//		context.arc(oldX, oldY, Math.sqrt(Math.pow(px, 2) + Math.pow(py, 2)), 0, Math.PI * 2, false); // full circle
+					context.arc(myIcon.PosX, myIcon.PosY, 140, 0, Math.PI * 2, false); // full circle
+					context.fill();
+					context.globalAlpha = 1;
+					myIcon.countVoice--;
+				}
 			}
+
 		}
 		Draw();		// 描画
-		
-		myIcon.Move(gBRightPush,gBLeftPush,gBUpPush,gBDownPush);//アイコンを動かす
+		if(myIcon) {
+			myIcon.Move(gBRightPush,gBLeftPush,gBUpPush,gBDownPush);//アイコンを動かす
+		}
 		requestNextAnimationFrame(animate);//描画がloopする
 	}
 	requestNextAnimationFrame(animate);		// loopスタート
