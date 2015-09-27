@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<meta charset="utf-8">
+	<title>JavaScriptデモ</title>
+	<link rel="stylesheet" href="./css/main.css">
+
+	<!--		<script src="js/mic.js"></script>-->
+	<meta name="viewport" content="width=device-width initial-scale=1.0">
+	
+</head>
+
+<body>
+	<div id="wrapper" class="clearfix">
+		<div id="gameCanvas">
+			<canvas id="canvas" width="1100" height="600"></canvas>
+		</div>
+		<!--end#gameCanvas-->
+		<div id="sidebar">
+			<h2>操作説明</h2>
+			<p>
+				canvas要素フォーカス状態で
+				<br> 方向キーでアイコン移動
+				<br> ドラッグで移動可
+			</p>
+			<input type="button" id="mkIconBtn" value="アイコンを作る">
+			<p>
+				<form action="" method="">
+					チャット(shift+enterで発言)
+					<br>
+					<textarea name="chat" rows="4" cols="30"></textarea>
+					<br>
+					<input type="button" id="button" value="発言">
+					<input type="reset" value="リセット">
+				</form>
+				文字はしばらくすると消えます。
+			</p>
+			<p class="micGainFxEmu">
+				このエリアをクリックすると、
+				<br> マイク入力があった場合の
+				<br> 画像エフェクトが表示されます。
+			</p>
+			</p>
+			<p>
+				<form id="myForm" action="" method="">
+					<br>
+					<textarea id="msg" name="socketIoChat" rows="4" cols="30"></textarea>
+					<br>
+					<input type="submit" id="button" value="発言">
+					<input type="reset" value="リセット">
+				</form>
+			</p>
+		</div>
+	</div>
+	<!--end#wrapper-->
+	<script src="./js/jquery-2.1.4.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="./js/icon.js"></script>
+	<script src="./js/main.js"></script>
+
+	<script>
+//	var socket;
+		$(function() {
+////			var socket = io.connect();
+//			socket = io.connect();
+//			console.log('connectしました。');
+//
+//			$('#myForm').submit(function (e) {
+//				e.preventDefault();
+//				socket.emit('emit_from_client', $('#msg').val());
+//				console.log('emit_from_clientしました');
+//				console.log($('#msg').val());
+//			});
+//			socket.on('emit_from_server', function (data) {
+//				console.log(data);
+//			});
+//
+//			$("#mkIconBtn").on('click', function (e) {
+////				e.preventDefault();
+//				var data = 'aaa';
+//				socket.emit('emit_from_client_mkIconBtn', data);
+//				console.log(data);
+//			});
+		});
+	</script>
+</body>
+
+</html>
