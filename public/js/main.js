@@ -9,6 +9,7 @@ var gBRightPush = false;	// right
 var gBUpPush = false;		// up
 var gBDownPush = false;	// down
 var myIcon;
+var otherIcon;
 var icons = [];
 
 var socket;
@@ -50,6 +51,9 @@ $(document).ready(function(){
 				case 13:
 					if (event.shiftKey) { // Shiftキーも押された
 						myIcon.SendChat();
+						icons.forEach(function(icon) {
+							icon.SendChat();
+						});
 					}
 			}
 		}
@@ -111,18 +115,22 @@ $(document).ready(function(){
 //	});
 
 	socket.on('connect', function() {
+		socket.on('emit_fron_server_sendIcons', function(data){
+			console.dir(data);
+			data.forEach(function(icon) {
+				icons.push(MyIcon.fromObject( icon,canvasWidth/2, canvasHeight/2 ));
+			});
+		});
 		// クラス生成
 		myIcon = new MyIcon();		// クラス
-		myIcon.Init( canvasWidth/2, canvasHeight/2 ); //初期化メソッド実行(初期の位置を引数に渡してcanvas要素中央に配置)
-//		myUniqueId = socket.id;
-		
-		//socket.emit('emit_from_client_join', {uniqueId:socket.id, pos});
+		myIcon.Init( canvasWidth/2, canvasHeight/2 ); //初期化メソッド実行(初期の位置を引数に渡してcanvas要素中央に配置)//
+//		myIcon.uniqueId = socket.id;
+
+		socket.emit('emit_from_client_join', myIcon);
 		socket.on('emit_from_server_join', function(data) {
 			console.log(data);
+			icons.push(MyIcon.fromObject( data, canvasWidth/2, canvasHeight/2  ));
 		});
-//		myIcon.uniqueId = myUniqueId;
-//		console.log(myIcon);
-//		socket.emit('client_from_emit_joinIcon', myIcon);//iconをサーバーに送る
 
 		
 //		socket.on('server_from_emit_iconAdd', function (data) {//icons配列を受け取る
@@ -136,6 +144,13 @@ $(document).ready(function(){
 //				}
 //			}
 //		});
+		
+		socket.on('emit_from_server_iconMove', function(data) {
+			if(otherIcon){
+				otherIcon.PosX = data.PosX;
+				otherIcon.PosY = data.PosY;
+			}
+		});
 	});
 //	$("#mkIconBtn").on('click', function (e) {
 //		var data = 'aaa';
@@ -169,17 +184,26 @@ $(document).ready(function(){
 		if(myIcon) {
 			myIcon.beginDrag();
 		}
+		icons.forEach(function(icon) {
+			icon.beginDrag();
+		});
 	};
 	canvas.onmousemove = function () {
 		mousePos(event);//mouseX,mouseY座標を取得
 		if(myIcon) {
 			myIcon.drag();
 		}
+		icons.forEach(function(icon) {
+			icon.drag();
+		});
 	};
 	canvas.onmouseup = function () {
 		if(myIcon) {
 			myIcon.endDrag();
 		}
+		icons.forEach(function(icon) {
+			icon.endDrag();
+		});
 	};
 
 	//レンダリング関数-----------------------------------------------------
@@ -254,7 +278,12 @@ $(document).ready(function(){
 			}
 		}
 		if( volume ){
-			myIcon.countVoice = 100;
+			if(myIcon) {
+				myIcon.countVoice = 100;
+			}
+			icons.forEach(function(icon) {
+				icon.countVoice = 100;
+			});
 		}
 		
 		//	Draw
@@ -277,12 +306,39 @@ $(document).ready(function(){
 					myIcon.countVoice--;
 				}
 			}
+			
+			
+			//otherIcon-------------------
+			icons.forEach(function(icon) {
+				icon.endDrag();
+			
+				icon.Draw(context,0,0); //myIconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,イメージオブジェクト,0,0)
+				icon.DrawChat(); //myIconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,str)
+				if(icon.countVoice){
+					context.globalAlpha = icon.countVoice * 3 / 1000;
+					context.fillStyle = "#ff0";
+					context.beginPath();
+					//円の設定（X中心軸,Y中心軸、半径、円のスタート度、円のエンド度、回転）
+					//		context.arc(oldX, oldY, Math.sqrt(Math.pow(px, 2) + Math.pow(py, 2)), 0, Math.PI * 2, false); // full circle
+					context.arc(icon.PosX, icon.PosY, 140, 0, Math.PI * 2, false); // full circle
+					context.fill();
+					context.globalAlpha = 1;
+					icon.countVoice--;
+				}
+			});
+
+
 
 		}
 		Draw();		// 描画
-		if(myIcon) {
-			myIcon.Move(gBRightPush,gBLeftPush,gBUpPush,gBDownPush);//アイコンを動かす
-		}
+		icons.forEach(function(icon) {
+			icon.Move(gBRightPush,gBLeftPush,gBUpPush,gBDownPush);//アイコンを動かす
+			socket.emit('emit_from_client_iconMove', {uniqueId:icons.uniqueId,PosX:icons.PosX,PosY:icons.PosY});
+		});
+		icons.forEach(function(icon) {
+			icon.Move(gBRightPush,gBLeftPush,gBUpPush,gBDownPush);//アイコンを動かす
+			socket.emit('emit_from_client_iconMove', {uniqueId:icon.uniqueId,PosX:icons.PosX,PosY:icons.PosY});
+		});
 		requestNextAnimationFrame(animate);//描画がloopする
 	}
 	requestNextAnimationFrame(animate);		// loopスタート

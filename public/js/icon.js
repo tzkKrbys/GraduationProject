@@ -26,6 +26,22 @@ MyIcon.prototype.Init = function(x,y){//引数にx,yの初期位置を渡す
 	this.iconImg.src = "../img/circleParis.png";//アイコン画像を渡す
 }
 
+MyIcon.fromObject = function(obj, x, y) {
+	console.log(obj);
+	var icon = new MyIcon();
+//	icon.xxx = obj.xxx;
+	Object.keys(obj).forEach(function (key) {
+		icon[key] = obj[key];
+		
+	});
+	
+	console.log(icon);
+	icon.Init(x, y);
+	// ...
+	return icon;
+}
+
+
 /*アイコン描画関数*/
 MyIcon.prototype.Draw = function(img,offsetX,offSetY){ //引数 CanvasRenderingContext2Dオブジェクト,0,0
 	img.save(); //現在の描画スタイル状態を一時的に保存//context . save() 現在の状態をスタックの最後に加えます。
