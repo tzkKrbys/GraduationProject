@@ -16,6 +16,8 @@ var socket;
 
 var myUniqueId;
 
+
+
 $(document).ready(function(){
 //	function init() {//初期化関数
 		// canvasに代入
@@ -51,9 +53,9 @@ $(document).ready(function(){
 				case 13:
 					if (event.shiftKey) { // Shiftキーも押された
 						myIcon.SendChat();
-						icons.forEach(function(icon) {
-							icon.SendChat();
-						});
+//						icons.forEach(function(icon) {
+//							icon.SendChat();
+//						});
 					}
 			}
 		}
@@ -116,15 +118,15 @@ $(document).ready(function(){
 
 	socket.on('connect', function() {
 		socket.on('emit_fron_server_sendIcons', function(data){
-			console.dir(data);
 			data.forEach(function(icon) {
+				if (!icon) return;
 				icons.push(MyIcon.fromObject( icon,canvasWidth/2, canvasHeight/2 ));
 			});
 		});
 		// クラス生成
 		myIcon = new MyIcon();		// クラス
 		myIcon.Init( canvasWidth/2, canvasHeight/2 ); //初期化メソッド実行(初期の位置を引数に渡してcanvas要素中央に配置)//
-//		myIcon.uniqueId = socket.id;
+		myIcon.uniqueId = socket.id;
 
 		socket.emit('emit_from_client_join', myIcon);
 		socket.on('emit_from_server_join', function(data) {
@@ -184,26 +186,26 @@ $(document).ready(function(){
 		if(myIcon) {
 			myIcon.beginDrag();
 		}
-		icons.forEach(function(icon) {
-			icon.beginDrag();
-		});
+//		icons.forEach(function(icon) {
+//			icon.beginDrag();
+//		});
 	};
 	canvas.onmousemove = function () {
 		mousePos(event);//mouseX,mouseY座標を取得
 		if(myIcon) {
 			myIcon.drag();
 		}
-		icons.forEach(function(icon) {
-			icon.drag();
-		});
+//		icons.forEach(function(icon) {
+//			icon.drag();
+//		});
 	};
 	canvas.onmouseup = function () {
 		if(myIcon) {
 			myIcon.endDrag();
 		}
-		icons.forEach(function(icon) {
-			icon.endDrag();
-		});
+//		icons.forEach(function(icon) {
+//			icon.endDrag();
+//		});
 	};
 
 	//レンダリング関数-----------------------------------------------------
@@ -259,8 +261,26 @@ $(document).ready(function(){
 		};
 	})();
 	//レンダリング関数終了-----------------------------------------------------
-	
+	var countFrames = 0;
 	function animate(now) {//レンダリング関数
+		countFrames++;
+		console.log(countFrames % 60 == 0 );
+		//サーバーにmyIconインスタンスを丸ごと送る
+		if (countFrames % 60 == 0 ) {
+			socket.emit('emit_from_client_iconUpdate', myIcon);
+			socket.on('emit_from_server_iconUpdate', function(data) {
+				console.log(data);
+				icons.forEach(function(icon, i, icons) {
+					console.log(icon);
+					console.log(i);
+					console.log(icons);
+					if (icon.uniqueId == data.uniqueId ) {
+						icons[i] = MyIcon.fromObject( data, data.PosX, data.PosY );
+					}
+//					icons.push(icon);
+				});
+			});
+		}
 		//符号なし8bitArrayを生成
 		var data = new Uint8Array(analyser.frequencyBinCount);
 		//周波数データ
@@ -306,12 +326,9 @@ $(document).ready(function(){
 					myIcon.countVoice--;
 				}
 			}
-			
-			
 			//otherIcon-------------------
 			icons.forEach(function(icon) {
 				icon.endDrag();
-			
 				icon.Draw(context,0,0); //myIconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,イメージオブジェクト,0,0)
 				icon.DrawChat(); //myIconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,str)
 				if(icon.countVoice){
@@ -326,19 +343,18 @@ $(document).ready(function(){
 					icon.countVoice--;
 				}
 			});
-
-
-
 		}
 		Draw();		// 描画
-		icons.forEach(function(icon) {
-			icon.Move(gBRightPush,gBLeftPush,gBUpPush,gBDownPush);//アイコンを動かす
-			socket.emit('emit_from_client_iconMove', {uniqueId:icons.uniqueId,PosX:icons.PosX,PosY:icons.PosY});
-		});
-		icons.forEach(function(icon) {
-			icon.Move(gBRightPush,gBLeftPush,gBUpPush,gBDownPush);//アイコンを動かす
-			socket.emit('emit_from_client_iconMove', {uniqueId:icon.uniqueId,PosX:icons.PosX,PosY:icons.PosY});
-		});
+//		icons.forEach(function(icon) {
+		if(myIcon) {
+			myIcon.Move(gBRightPush,gBLeftPush,gBUpPush,gBDownPush);//アイコンを動かす
+		}
+//		socket.emit('emit_from_client_iconMove', {uniqueId:icons.uniqueId,PosX:icons.PosX,PosY:icons.PosY});
+//		});
+//		icons.forEach(function(icon) {
+//			icon.Move(gBRightPush,gBLeftPush,gBUpPush,gBDownPush);//アイコンを動かす
+//			socket.emit('emit_from_client_iconMove', {uniqueId:icon.uniqueId,PosX:icons.PosX,PosY:icons.PosY});
+//		});
 		requestNextAnimationFrame(animate);//描画がloopする
 	}
 	requestNextAnimationFrame(animate);		// loopスタート

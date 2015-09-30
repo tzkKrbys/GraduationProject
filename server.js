@@ -6,6 +6,9 @@ var cache = {};
 var app = require('./lib/app');
 
 var socketio = require('socket.io');
+var util = require('util');
+//console.log(util.inspect(obj,false,null));でオブジェクトをターミナルで確認できるように
+
 
 
 var guestNumber = 1;
@@ -205,36 +208,13 @@ io.set('log level', 1);
 
 io.sockets.on('connection', function (socket) {
 	
-	
+	//io.sockets.socketsは配列になっている
 	socket.emit('emit_fron_server_sendIcons', io.sockets.sockets.map(function(e) {
-		console.log('io.sockets.sockets　；　' + io.sockets.sockets);
-		console.log('io.sockets.sockets[0]　；　' + io.sockets.sockets[0]);
-		console.log('io.sockets.sockets[0][0]　；　' + io.sockets.sockets[0][0]);
-		console.log('io.sockets.sockets[0][1]　；　' + io.sockets.sockets[0][1]);
-		console.log('io.sockets.sockets[1]　；　' + io.sockets.sockets[1]);
-		console.log('210行目　e　' + e);
-		console.log('210行目　' + e.icon);
 		return e.icon;
 		
 	}));
-//	guestNumber = assignGuestName(socket, guestNumber, nickNames, namesUsed);
-//	joinRoom(socket, 'Lobby');
-//	handleMessageBroadcasting(socket, nickNames);
-//	handleNameChangeAttempts(socket, nickNames, namesUsed);
-//	handleRoomJoining(socket);
-//	socket.on('rooms', function () {
-//		socket.emit('rooms', io.sockets.manager.rooms);
-//	});
-//	handleClientDisconnection(socket, nickNames, namesUsed);
 
 
-	
-	
-	
-	
-	
-	
-	
 	socket.hoge = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 //	console.log(io.sockets.sockets);
 	
@@ -249,11 +229,28 @@ io.sockets.on('connection', function (socket) {
 //	socket.on('client_from_emit_icon_move', function(data) {
 //		console.log(data);
 //	});
-	
+
+
+	//iconのプロパティを更新する
+	socket.on('emit_from_client_iconUpdate', function (data) {
+		socket.icon = data;
+		console.log(socket.icon);
+		socket.broadcast.emit('emit_from_server_iconUpdate', data);
+//		socket.broadcast.emit('emit_from_server_iconUpdate', io.sockets.sockets.map(function(e) {
+//			return e.icon;
+//		}));
+//		console.log(data);
+	});
+
 	socket.on('client_from_emit_icon_draw', function (data) {
 		io.sockets.emit('server_from_emit_icon_draw', data);
 //		console.log(data);
 	});
+	
+	
+	
+	
+	
 	
 	socket.on('emit_from_client_mkIconBtn', function (data) {
 		console.log(data);
