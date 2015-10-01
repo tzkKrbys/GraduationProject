@@ -253,7 +253,7 @@ OtherIcon.prototype.SendChat = function () {
 	this.chatShowCount = 500;
 	$('textarea').val("");
 	return false;
-}
+};
 
 
 //ドラッグ&ドロップ関数

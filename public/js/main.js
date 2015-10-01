@@ -52,6 +52,7 @@ $(document).ready(function(){
 					break;
 				case 13:
 					if (event.shiftKey) { // Shiftキーも押された
+						event.preventDefault();
 						myIcon.SendChat();
 						socket.emit('emit_from_client_sendMsg', {str: myIcon.str, chatShowCount: myIcon.chatShowCount});
 					}
@@ -107,12 +108,7 @@ $(document).ready(function(){
 	
 	
 	
-//	$('#myForm').submit(function (e) {
-//		e.preventDefault();
-//		socket.emit('emit_from_client', $('#msg').val());
-//		console.log('emit_from_clientしました');
-//		console.log($('#msg').val());
-//	});
+
 
 //-------------------------------------------socket.io---//
 	socket.on('connect', function() {
@@ -149,7 +145,6 @@ $(document).ready(function(){
 		});
 		
 		socket.on('emit_from_server_sendMsg', function(data) {
-			console.log(data);
 			icons.forEach(function(icon, i, icons) {
 				if(icon.uniqueId == data.uniqueId) {
 					console.log('きてます');
@@ -162,12 +157,21 @@ $(document).ready(function(){
 	
 
 
-	$('#button').on("click",function(){
+	$('#sendMsgBtn').on("click",function(){
 		myIcon.SendChat();
 		socket.emit('emit_from_client_sendMsg', {str: myIcon.str, chatShowCount: myIcon.chatShowCount});
 	});
 
 
+//	$('#myForm').submit(function (e) {
+////		e.preventDefault();
+////		socket.emit('emit_from_client', $('#msg').val());
+////		console.log('emit_from_clientしました');
+////		console.log($('#msg').val());
+////
+//		myIcon.SendChat();
+//		socket.emit('emit_from_client_sendMsg', {str: myIcon.str, chatShowCount: myIcon.chatShowCount});
+//	});
 
 	//canvas要素にイベント設定----------------------s
 	canvas.onmousedown = function () {

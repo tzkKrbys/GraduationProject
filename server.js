@@ -71,134 +71,6 @@ server.listen(3000, function () {
 });
 
 
-
-//function listen(server) {
-//	console.log('listen!!!!!!!!!!!!');
-//	io = socketio.listen(server);
-//	io.set('log level', 1);
-//	io.sockets.on('connection', function (socket) {
-//		guestNumber = assignGuestName(socket, guestNumber, nickNames, namesUsed);
-//		joinRoom(socket, 'Lobby');
-//		handleMessageBroadcasting(socket, nickNames);
-//		handleNameChangeAttempts(socket, nickNames, namesUsed);
-//		handleRoomJoining(socket);
-//		socket.on('rooms', function () {
-//			socket.emit('rooms', io.sockets.manager.rooms);
-//		});
-//		handleClientDisconnection(socket, nickNames, namesUsed);
-//		//追加したやつ
-//		socket.on('emit_from_client', function (data) {
-//			console.log(data);
-//		});
-//	});
-//};
-
-
-
-//var app = require('./lib/app');
-//app.listen(server);
-
-
-
-
-
-//function assignGuestName(socket, guestNumber, nickNames, namesUsed) {
-//	var name = 'Guest' + guestNumber;
-//	nickNames[socket.id] = name;
-//	socket.emit('nameResult', {
-//		success: true,
-//		name: name
-//	});
-//	namesUsed.push(name);
-//	return guestNumber + 1;
-//}
-//
-//function joinRoom(socket, room) {
-//	socket.join(room);
-//	currentRoom[socket.id] = room;
-//	socket.emit('joinResult', {
-//		room: room
-//	});
-//	socket.broadcast.to(room).emit('message', {
-//		text: nickNames[socket.id] + ' has joined ' + room + '.'
-//	});
-//
-//	var usersInRoom = io.sockets.clients(room);
-//	if (usersInRoom.length > 1) {
-//		var usersInRoomSummary = 'Users currently in ' + room + ': ';
-//		for (var index in usersInRoom) {
-//			var userSocketId = usersInRoom[index].id;
-//			if (userSocketId != socket.id) {
-//				if (index > 0) {
-//					usersInRoomSummary += ', ';
-//				}
-//				usersInRoomSummary += nickNames[userSocketId];
-//			}
-//		}
-//		usersInRoomSummary += '.';
-//		socket.emit('message', {
-//			text: usersInRoomSummary
-//		});
-//	}
-//}
-//
-//function handleNameChangeAttempts(socket, nickNames, namesUsed) {
-//	socket.on('nameAttempt', function (name) {
-//		if (name.indexOf('Guest') == 0) {
-//			socket.emit('nameResult', {
-//				success: false,
-//				message: 'Names cannot begin with "Guest".'
-//			});
-//		} else {
-//			if (namesUsed.indexOf(name) == -1) {
-//				var previousName = nickNames[socket.id];
-//				var previousNameIndex = namesUsed.indexOf(previousName);
-//				namesUsed.push(name);
-//				nickNames[socket.id] = name;
-//				delete namesUsed[previousNameIndex];
-//				socket.emit('nameResult', {
-//					success: true,
-//					name: name
-//				});
-//				socket.broadcast.to(currentRoom[socket.id]).emit('message', {
-//					text: previousName + ' is now known as ' + name + '.'
-//				});
-//			} else {
-//				socket.emit('nameResult', {
-//					success: false,
-//					message: 'That name is already in use.'
-//				});
-//			}
-//		}
-//	});
-//}
-//
-//function handleMessageBroadcasting(socket) {
-//	socket.on('message', function (message) {
-//		socket.broadcast.to(message.room).emit('message', {
-//			text: nickNames[socket.id] + ': ' + message.text
-//		});
-//	});
-//}
-//
-//function handleRoomJoining(socket) {
-//	socket.on('join', function (room) {
-//		socket.leave(currentRoom[socket.id]);
-//		joinRoom(socket, room.newRoom);
-//	});
-//}
-//
-//function handleClientDisconnection(socket) {
-//	socket.on('disconnect', function () {
-//		var nameIndex = namesUsed.indexOf(nickNames[socket.id]);
-//		delete namesUsed[nameIndex];
-//		delete nickNames[socket.id];
-//	});
-//}
-
-
-
-
 var io = socketio.listen(server);
 var icons = [];
 var ids = [];
@@ -215,7 +87,6 @@ io.sockets.on('connection', function (socket) {
 
 
 	socket.hoge = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-//	console.log(io.sockets.sockets);
 	
 	console.log('clientから接続がありました');
 	socket.on('emit_from_client', function (data) {
@@ -247,17 +118,8 @@ io.sockets.on('connection', function (socket) {
 		socket.icon = data;
 		socket.broadcast.emit('emit_from_server_join', data);
 	});
-	
-//	socket.on('emit_from_client_iconMove', function(data) {
-//		for (var i = 0; i < icons.length; i++) {
-//			if(icons[i].uniqueId == data.uniqueId) {
-//				icons[i].PosX = data.PosX;
-//				icons[i].PosY = data.PosY;
-//				socket.emit('emit_from_server_iconMove', icons[i])
-//			}
-//		}
-//	});
-	
+
+
 	socket.on('emit_from_client_iconPosChanged', function(data) {
 		socket.icon.PosX = data.PosX;
 		socket.icon.PosY = data.PosY;
@@ -280,87 +142,6 @@ io.sockets.on('connection', function (socket) {
 		socket.broadcast.emit('emit_from_server_iconRemove', socket.id);
 	});
 });//---end---io.sockets.on('connection'
-
-
-//function assignGuestName(socket, guestNumber, nickNames, namesUsed) {
-//	var name = 'Guest' + guestNumber;
-//	nickNames[socket.id] = name;
-//	socket.emit('nameResult', {
-//		success: true,
-//		name: name
-//	});
-//	namesUsed.push(name);
-//	return guestNumber + 1;
-//}
-
-
-//function joinRoom(socket, room) {
-//	socket.join(room);
-//
-//	currentRoom[socket.id] = room;//ユーザーがこのルームに参加したことを記録する
-//
-//	//ユーザーに新しいルームに入ったことを知らせる
-//	socket.emit('joinResult', {
-//		room: room
-//	});
-//	//ルームにいる他のユーザーに、このユーザーが入室したことを知らせる
-//	socket.broadcast.to(room).emit('message', {
-//		text: nickNames[socket.id] + ' has joined ' + room + '.'
-//	});
-//	//同じルームに、他に誰がいるのかの判定
-//	var usersInRoom = io.sockets.clients(room);
-//	
-//	if (usersInRoom.length > 1) {//もしユーザーがいたら、その概要を作る
-//		var usersInRoomSummary = 'Users currently in ' + room + ': ';
-//		for (var index in usersInRoom) {
-//			var userSocketId = usersInRoom[index].id;
-//			if (userSocketId != socket.id) {
-//				if (index > 0) {
-//					usersInRoomSummary += ', ';
-//				}
-//				usersInRoomSummary += nickNames[userSocketId];
-//			}
-//		}
-//		usersInRoomSummary += '.';
-//		socket.emit('message', {
-//			text: usersInRoomSummary
-//		});
-//	}
-//}
-
-//function joinRoom(socket, room) {
-//	socket.join(room);
-//	currentRoom[socket.id] = room;
-//	socket.emit('joinResult', {
-//		room: room
-//	});
-//	socket.broadcast.to(room).emit('message', {
-//		text: nickNames[socket.id] + ' has joined ' + room + '.'
-//	});
-//	console.log('io.socketsですよー！：' + io.sockets.clients);
-//	var usersInRoom = io.sockets.clients(room);
-//	if (usersInRoom.length > 1) {
-//		var usersInRoomSummary = 'Users currently in ' + room + ': ';
-//		for (var index in usersInRoom) {
-//			var userSocketId = usersInRoom[index].id;
-//			if (userSocketId != socket.id) {
-//				if (index > 0) {
-//					usersInRoomSummary += ', ';
-//				}
-//				usersInRoomSummary += nickNames[userSocketId];
-//			}
-//		}
-//		usersInRoomSummary += '.';
-//		socket.emit('message', {
-//			text: usersInRoomSummary
-//		});
-//	}
-//}
-
-
-
-
-
 
 
 
