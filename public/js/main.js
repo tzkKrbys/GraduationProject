@@ -294,11 +294,16 @@ $(document).ready(function(){
 		if( volume ){
 			if(myIcon) {
 				myIcon.countVoice = 100;
+				socket.emit('emit_from_client_voicePU', myIcon.countVoice);
 			}
-			icons.forEach(function(icon) {
-				icon.countVoice = 100;
-			});
 		}
+		socket.on('emit_from_server_voicePU', function(data) {
+			icons.forEach(function (icon, i, icons) {
+				if(icon.uniqueId == data.uniqueId) {
+					icons[i].countVoice = data.countVoice;
+				}
+			});
+		});
 		
 		//	Draw
 		//	描画

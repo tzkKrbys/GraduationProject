@@ -268,6 +268,11 @@ io.sockets.on('connection', function (socket) {
 		socket.broadcast.emit('emit_from_server_sendMsg',{ uniqueId: socket.id, str: data.str, chatShowCount: data.chatShowCount});
 	});
 	
+	
+	socket.on('emit_from_client_voicePU', function(data) {
+		socket.broadcast.emit('emit_from_server_voicePU', { uniqueId: socket.id ,countVoice: data});
+	});
+	
 	socket.on('disconnect', function() {
 		console.log(socket.id);
 		console.log('disconnect');
