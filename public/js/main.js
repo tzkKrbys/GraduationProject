@@ -53,9 +53,7 @@ $(document).ready(function(){
 				case 13:
 					if (event.shiftKey) { // Shiftキーも押された
 						myIcon.SendChat();
-//						icons.forEach(function(icon) {
-//							icon.SendChat();
-//						});
+						socket.emit('emit_from_client_sendMsg', {str: myIcon.str, chatShowCount: myIcon.chatShowCount});
 					}
 			}
 		}
@@ -116,6 +114,7 @@ $(document).ready(function(){
 //		console.log($('#msg').val());
 //	});
 
+//-------------------------------------------socket.io---//
 	socket.on('connect', function() {
 		socket.on('emit_fron_server_sendIcons', function(data){
 			data.forEach(function(icon) {
@@ -129,23 +128,12 @@ $(document).ready(function(){
 		myIcon.uniqueId = socket.id;
 
 		socket.emit('emit_from_client_join', myIcon);
+
 		socket.on('emit_from_server_join', function(data) {
 			console.log(data);
 			icons.push(MyIcon.fromObject( data, canvasWidth/2, canvasHeight/2  ));
 		});
 
-		
-//		socket.on('server_from_emit_iconAdd', function (data) {//icons配列を受け取る
-//			console.log(data);
-//			icons = data;
-//			for(var i = 0; i < data.length; i++) {
-//				if(data[i].uniqueId === myUniqueId) {
-//					console.log('発見！' + data[i]);
-//					console.log(data[i]);
-//					console.log(myIcon);
-//				}
-//			}
-//		});
 		
 		socket.on('emit_from_server_iconMove', function(data) {
 			if(otherIcon){
@@ -153,31 +141,31 @@ $(document).ready(function(){
 				otherIcon.PosY = data.PosY;
 			}
 		});
+		
+		socket.on('emit_from_server_iconRemove', function(data){
+			icons.forEach(function(icon, i, icons) {
+				if(icon.uniqueId == data) icons.splice(i, 1);
+			});
+		});
+		
+		socket.on('emit_from_server_sendMsg', function(data) {
+			console.log(data);
+			icons.forEach(function(icon, i, icons) {
+				if(icon.uniqueId == data.uniqueId) {
+					console.log('きてます');
+					icons[i].str = data.str;
+					icons[i].chatShowCount = data.chatShowCount;
+				}
+			});
+		});
+	});//----------end----------socket.on('connect'
+	
+
+
+	$('#button').on("click",function(){
+		myIcon.SendChat();
+		socket.emit('emit_from_client_sendMsg', {str: myIcon.str, chatShowCount: myIcon.chatShowCount});
 	});
-//	$("#mkIconBtn").on('click', function (e) {
-//		var data = 'aaa';
-//		socket.emit('emit_from_client_mkIconBtn', data);
-//		console.log(data);
-//	});
-
-//	$('#button').on("click",function(){
-//		myIcon.SendChat();
-//	});
-
-
-//	$(document).on("keydown", function(e) {
-//		if (e.keyCode == 13) { // Enterが押された
-//			$.noop();//何もしないことを明示的に記述
-//			if (e.shiftKey) { // Shiftキーも押された
-//				myIcon.SendChat();
-//			}
-//		} else {
-//			$.noop();//何もしないことを明示的に記述
-//		}
-//	});
-
-
-
 
 
 
@@ -186,26 +174,20 @@ $(document).ready(function(){
 		if(myIcon) {
 			myIcon.beginDrag();
 		}
-//		icons.forEach(function(icon) {
-//			icon.beginDrag();
-//		});
 	};
 	canvas.onmousemove = function () {
 		mousePos(event);//mouseX,mouseY座標を取得
 		if(myIcon) {
+			PosX = myIcon.PosX;
+			PosY = myIcon.PosY;
 			myIcon.drag();
+			positionChange();
 		}
-//		icons.forEach(function(icon) {
-//			icon.drag();
-//		});
 	};
 	canvas.onmouseup = function () {
 		if(myIcon) {
 			myIcon.endDrag();
 		}
-//		icons.forEach(function(icon) {
-//			icon.endDrag();
-//		});
 	};
 
 	//レンダリング関数-----------------------------------------------------
@@ -261,26 +243,38 @@ $(document).ready(function(){
 		};
 	})();
 	//レンダリング関数終了-----------------------------------------------------
+	var PosX;
+	var PosY;
 	var countFrames = 0;
+	function positionChange() {
+		if(myIcon) {
+			if(myIcon.PosX != PosX || myIcon.PosY != PosY) {
+				socket.emit('emit_from_client_iconPosChanged', {PosX: myIcon.PosX, PosY: myIcon.PosY});
+			}
+		}
+	}
 	function animate(now) {//レンダリング関数
 		countFrames++;
-		console.log(countFrames % 60 == 0 );
-		//サーバーにmyIconインスタンスを丸ごと送る
-		if (countFrames % 60 == 0 ) {
-			socket.emit('emit_from_client_iconUpdate', myIcon);
-			socket.on('emit_from_server_iconUpdate', function(data) {
-				console.log(data);
-				icons.forEach(function(icon, i, icons) {
-					console.log(icon);
-					console.log(i);
-					console.log(icons);
-					if (icon.uniqueId == data.uniqueId ) {
-						icons[i] = MyIcon.fromObject( data, data.PosX, data.PosY );
-					}
-//					icons.push(icon);
-				});
-			});
+		if(myIcon) {
+			PosX = myIcon.PosX;
+			PosY = myIcon.PosY;
 		}
+		//サーバーにmyIconインスタンスを丸ごと送る
+//		if (countFrames % 60 == 0 ) {
+//			socket.emit('emit_from_client_iconUpdate', myIcon);
+//			socket.on('emit_from_server_iconUpdate', function(data) {
+//				console.log(data);
+//				icons.forEach(function(icon, i, icons) {
+//					console.log(icon);
+//					console.log(i);
+//					console.log(icons);
+//					if (icon.uniqueId == data.uniqueId ) {
+//						icons[i] = MyIcon.fromObject( data, data.PosX, data.PosY );
+//					}
+////					icons.push(icon);
+//				});
+//			});
+//		}
 		//符号なし8bitArrayを生成
 		var data = new Uint8Array(analyser.frequencyBinCount);
 		//周波数データ
@@ -309,11 +303,11 @@ $(document).ready(function(){
 		//	Draw
 		//	描画
 		function Draw(){
-			context.fillStyle = "rgb(255,255,255)";// 白に設定。CanvasRenderingContext2Dオブジェクト
-			context.clearRect(0,0,canvasWidth,canvasHeight);// 塗りつぶし。CanvasRenderingContext2Dオブジェクト
+			context.fillStyle = "rgb(255,255,255)";// 白に設定。
+			context.clearRect(0,0,canvasWidth,canvasHeight);// 塗りつぶし。
 			if(myIcon) {
-				myIcon.Draw(context,0,0); //myIconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,イメージオブジェクト,0,0)
-				myIcon.DrawChat(); //myIconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,str)
+				myIcon.Draw(context,0,0); //myIconの描画メソッド呼出
+				myIcon.DrawChat(); //myIconオブジェクトの描画メソッド呼出
 				if(myIcon.countVoice){
 					context.globalAlpha = myIcon.countVoice * 3 / 1000;
 					context.fillStyle = "#ff0";
@@ -326,6 +320,7 @@ $(document).ready(function(){
 					myIcon.countVoice--;
 				}
 			}
+
 			//otherIcon-------------------
 			icons.forEach(function(icon) {
 				icon.endDrag();
@@ -345,28 +340,22 @@ $(document).ready(function(){
 			});
 		}
 		Draw();		// 描画
-//		icons.forEach(function(icon) {
 		if(myIcon) {
 			myIcon.Move(gBRightPush,gBLeftPush,gBUpPush,gBDownPush);//アイコンを動かす
 		}
-//		socket.emit('emit_from_client_iconMove', {uniqueId:icons.uniqueId,PosX:icons.PosX,PosY:icons.PosY});
-//		});
-//		icons.forEach(function(icon) {
-//			icon.Move(gBRightPush,gBLeftPush,gBUpPush,gBDownPush);//アイコンを動かす
-//			socket.emit('emit_from_client_iconMove', {uniqueId:icon.uniqueId,PosX:icons.PosX,PosY:icons.PosY});
-//		});
+
+		socket.on('emit_from_server_iconPosChanged', function(data) {
+			icons.forEach(function(icon, i, icons) {
+				if(icon.uniqueId == data.uniqueId) {
+					icons[i].PosX = data.PosX;
+					icons[i].PosY = data.PosY;
+				}
+			});
+		})
+		positionChange();
 		requestNextAnimationFrame(animate);//描画がloopする
 	}
 	requestNextAnimationFrame(animate);		// loopスタート
-
-
-	$('.micGainFxEmu').on("click",function(){
-		myIcon.countVoice = 100;
-	});
-
-
-
-
 
 
 

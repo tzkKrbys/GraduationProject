@@ -6,8 +6,7 @@ var cache = {};
 var app = require('./lib/app');
 
 var socketio = require('socket.io');
-var util = require('util');
-//console.log(util.inspect(obj,false,null));でオブジェクトをターミナルで確認できるように
+var util = require('util');//console.log(util.inspect(obj,false,null));でオブジェクトの中身をターミナルで確認できるようにする為
 
 
 
@@ -225,61 +224,57 @@ io.sockets.on('connection', function (socket) {
 		io.sockets.emit('emit_from_server', 'you sended message ' + data);
 	});
 	console.log('connection キター！');
-//
-//	socket.on('client_from_emit_icon_move', function(data) {
-//		console.log(data);
-//	});
 
 
 	//iconのプロパティを更新する
 	socket.on('emit_from_client_iconUpdate', function (data) {
-		socket.icon = data;
+		socket.icon = data;//socketオブジェクトの中にiconを格納
 		console.log(socket.icon);
 		socket.broadcast.emit('emit_from_server_iconUpdate', data);
-//		socket.broadcast.emit('emit_from_server_iconUpdate', io.sockets.sockets.map(function(e) {
-//			return e.icon;
-//		}));
-//		console.log(data);
 	});
 
 	socket.on('client_from_emit_icon_draw', function (data) {
 		io.sockets.emit('server_from_emit_icon_draw', data);
-//		console.log(data);
 	});
-	
-	
-	
-	
 	
 	
 	socket.on('emit_from_client_mkIconBtn', function (data) {
 		console.log(data);
 	});
-//
-//	socket.on('client_from_emit_joinIcon', function(data) {
-//		console.log(data);
-//		icons.push(data);
-//		io.sockets.emit('server_from_emit_iconAdd', icons);
-//	});
-//	socket.on('emit_from_client_join', function (data) {
-//		io.sockets.emit('server_from_emit_iconAdd', data);
-//	});
-	
+
+
 	socket.on('emit_from_client_join', function(data) {
 		socket.icon = data;
 		socket.broadcast.emit('emit_from_server_join', data);
 	});
 	
-	socket.on('emit_from_client_iconMove', function(data) {
-		for (var i = 0; i < icons.length; i++) {
-			if(icons[i].uniqueId == data.uniqueId) {
-				icons[i].PosX = data.PosX;
-				icons[i].PosY = data.PosY;
-				socket.emit('emit_from_server_iconMove', icons[i])
-			}
-		}
-	})
-});
+//	socket.on('emit_from_client_iconMove', function(data) {
+//		for (var i = 0; i < icons.length; i++) {
+//			if(icons[i].uniqueId == data.uniqueId) {
+//				icons[i].PosX = data.PosX;
+//				icons[i].PosY = data.PosY;
+//				socket.emit('emit_from_server_iconMove', icons[i])
+//			}
+//		}
+//	});
+	
+	socket.on('emit_from_client_iconPosChanged', function(data) {
+		socket.icon.PosX = data.PosX;
+		socket.icon.PosY = data.PosY;
+		socket.broadcast.emit('emit_from_server_iconPosChanged', {uniqueId: socket.icon.uniqueId, PosX: socket.icon.PosX, PosY: socket.icon.PosY});
+	});
+	
+	socket.on('emit_from_client_sendMsg', function(data) {
+		socket.broadcast.emit('emit_from_server_sendMsg',{ uniqueId: socket.id, str: data.str, chatShowCount: data.chatShowCount});
+	});
+	
+	socket.on('disconnect', function() {
+		console.log(socket.id);
+		console.log('disconnect');
+		//サーバー側のiconはsocket.iconに格納されていて、disconnect時には勝手に消える為、削除処理不要
+		socket.broadcast.emit('emit_from_server_iconRemove', socket.id);
+	});
+});//---end---io.sockets.on('connection'
 
 
 //function assignGuestName(socket, guestNumber, nickNames, namesUsed) {
@@ -296,9 +291,9 @@ io.sockets.on('connection', function (socket) {
 
 //function joinRoom(socket, room) {
 //	socket.join(room);
-//	
+//
 //	currentRoom[socket.id] = room;//ユーザーがこのルームに参加したことを記録する
-//	
+//
 //	//ユーザーに新しいルームに入ったことを知らせる
 //	socket.emit('joinResult', {
 //		room: room

@@ -3,7 +3,7 @@
 * {
 	margin: 0;
 	padding: 0;
-	
+	box-sizing: border-box;
 }
 
 .clearfix:after {
@@ -27,18 +27,43 @@ h1{
 	background: url(../img/kyoushitsu.jpeg) center center no-repeat;
 	background-size: cover;
 }
-#sidebar {
-	width: 240px;
-	float: left;
-	border: 1px solid #000;
+#chatArea {
+	position: fixed;
+	left: 600px;
+	padding: 6px;
+	width: 382px;
+	height: 44px;
+	background: rgba(0,0,0,.5);
+	border-radius: 4px;
 }
-.micGainFxEmu {
-	height: 100px;
-	background: #ccc;
-	border: 1px solid #000;
-	margin: 5px;
-	padding: 5px;
-	font-size: 14px;
+
+#chatArea form {
+	width: 100%;
+	height: 100%;
 }
+
+#chatTextArea {
+	border-radius: 4px;
+	height: 30px;
+	opacity: .8;
+}
+
+#sendMsgBtn, #clearBtn {
+	width: 80px;
+	height: 30px;
+	border-radius: 6px;
+	margin-top: -10px;
+	position: relative;
+	top: -10px;
+	opacity: .8;
+}
+#sendMsgBtn {
+	background-color: #afa;
+}
+
+#clearBtn {
+	background-color: #aaf;
+}
+
 
 

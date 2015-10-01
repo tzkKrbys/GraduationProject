@@ -75,7 +75,7 @@ MyIcon.prototype.Move = function(bRight,bLeft,bUp,bDown){
 	}
 }
 //チャットの文字描画の為のメソッド
-MyIcon.prototype.DrawChat = function(str){
+MyIcon.prototype.DrawChat = function(){
 	if(this.chatShowCount > 0){
 		this.chatShowCount--;
 		//カラー指定
@@ -91,7 +91,6 @@ MyIcon.prototype.DrawChat = function(str){
 }
 MyIcon.prototype.SendChat = function () {
 	this.str = $('textarea').val();
-	this.DrawChat();
 	this.chatShowCount = 500;
 	$('textarea').val("");
 	return false;
@@ -141,6 +140,18 @@ MyIcon.prototype.mousePosCheck = function (event) {
 }
 
 //MyIconクラス------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //OtherIconクラス------------------------------------------------
