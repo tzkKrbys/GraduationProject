@@ -117,6 +117,8 @@ io.sockets.on('connection', function (socket) {
 	socket.on('emit_from_client_join', function(data) {
 		socket.icon = data;
 		socket.broadcast.emit('emit_from_server_join', data);
+		console.log('きてますよ〜');
+		console.log(data);
 	});
 
 

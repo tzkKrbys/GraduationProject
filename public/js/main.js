@@ -79,6 +79,7 @@ $(document).ready(function(){
 			}
 		}
 
+	//-------------------------------------マイク取得
 		//エラー処理
 		var errBack = function(e){
 			console.log("Web Audio error:",e.code);
@@ -88,6 +89,8 @@ $(document).ready(function(){
 			//streamからAudioNodeを作成
 			var mediaStreamSource = audioContext.createMediaStreamSource(stream);
 			mediaStreamSource.connect(filter);
+			console.log(mediaStreamSource);
+			console.log(mediaStreamSource.connect());
 			filter.connect(analyser);
 			//出力Nodeのdestinationに接続
 			analyser.connect(audioContext.destination);
@@ -101,6 +104,11 @@ $(document).ready(function(){
 		}else{
 			console.log("マイクデバイスがありません");
 		}
+	//-------------------------------------マイク取得
+
+
+
+
 //	};
 //	init();
 	socket = io.connect();
@@ -108,7 +116,9 @@ $(document).ready(function(){
 	
 	
 	
-	
+	myIcon = new MyIcon();		// クラス
+	myIcon.Init( canvasWidth/2, canvasHeight/2 ); //初期化メソッド実行(初期の位置を引数に渡してcanvas要素中央に配置)//
+
 
 
 //-------------------------------------------socket.io---//
@@ -120,11 +130,9 @@ $(document).ready(function(){
 			});
 		});
 		// クラス生成
-		myIcon = new MyIcon();		// クラス
-		myIcon.Init( canvasWidth/2, canvasHeight/2 ); //初期化メソッド実行(初期の位置を引数に渡してcanvas要素中央に配置)//
 		myIcon.uniqueId = socket.id;
 
-		socket.emit('emit_from_client_join', myIcon);
+		//socket.emit('emit_from_client_join', myIcon);
 
 		socket.on('emit_from_server_join', function(data) {
 			console.log(data);
@@ -251,6 +259,7 @@ $(document).ready(function(){
 	var PosX;
 	var PosY;
 	var countFrames = 0;
+
 	function positionChange() {
 		if(myIcon) {
 			if(myIcon.PosX != PosX || myIcon.PosY != PosY) {
@@ -280,11 +289,12 @@ $(document).ready(function(){
 //				});
 //			});
 //		}
+		
+		//-----------------------------------音声ビジュアルエフェクト
 		//符号なし8bitArrayを生成
 		var data = new Uint8Array(analyser.frequencyBinCount);
 		//周波数データ
 		analyser.getByteFrequencyData(data);
-		//console.log(data);
 		var volume = false;
 		for(var i = 0; i < data.length; ++i) {
 			//上部の描画
@@ -302,6 +312,10 @@ $(document).ready(function(){
 				socket.emit('emit_from_client_voicePU', myIcon.countVoice);
 			}
 		}
+		//-----------------------------------音声ビジュアルエフェクト
+
+		
+		
 		socket.on('emit_from_server_voicePU', function(data) {
 			icons.forEach(function (icon, i, icons) {
 				if(icon.uniqueId == data.uniqueId) {
@@ -312,7 +326,106 @@ $(document).ready(function(){
 		
 		//	Draw
 		//	描画
+
 		function Draw(){
+			
+			if( countFrames % 30 == 0 ) {
+				if(myIcon && peer && myStream) {
+					if(icons.length > 0) {
+						icons.forEach(function(icon) {
+							if(icon.peerId){
+								var diffX = icon.PosX - myIcon.PosX;
+								var diffY = icon.PosY - myIcon.PosY;
+								if((diffX * diffX) + (diffY * diffY) < 140 * 140){
+									console.log('いえい');
+									if(myIcon.talkingNodes.length < 1 && icon.talkingNodes < 1){
+										console.log(myIcon.talkingNodes);
+										var call = peer.call(icon.peerId, myStream);
+										console.log(icon.peerId);
+										console.log(myStream);
+										console.log(call);
+										call.on('stream', receiveOthersStream);
+										myIcon.talkingNodes.push({uniqueId: icon.uniqueId, call: call });
+										//								myIcon.talkingNodes.forEach(function(node) {
+		//									console.log('ので');
+		//									console.log(myIcon.talkingNodes);
+		//									console.log(node);
+		//									if(node.uniqueId != icon.uniqueId) {
+		//										var call = peer.call(icon.peerId, myStream);
+		//										call.on('stream', receiveOthersStream);
+		//										myIcon.talkingNodes.push({uniqueId: icon.uniqueId, call: call });
+		//									}
+		//								});
+									}
+								}else{
+									console.log('のー');
+									myIcon.talkingNodes.forEach(function(node, i, arr) {
+										if(node.uniqueId == icon.uniqueId) {
+											node.call.close();
+											arr.splice(i,1);
+
+										}
+									});
+								}
+							}
+						});
+					}
+				}
+			}
+//			if(myIcon) {
+//				if(myIcon.talkingCount < 1 ){
+//					console.log(myIcon.talkingCount);
+//					if(icons.length > 0) {
+//						icons.forEach(function(icon) {
+//							if(icon.talkingCount > 0 ) return;
+//							var diffX = icon.PosX - myIcon.PosX;
+//							var diffY = icon.PosY - myIcon.PosY;
+//							if((diffX * diffX) + (diffY * diffY) < 140 * 140){
+//								console.log('いえい');
+//							}else{
+//								var call = peer.call(icon.peerId, myStream);
+//								call.on('stream', receiveOthersStream);
+//								talkingNode.push(call);
+//								myIcon.talkingCount++;
+//							}
+//						});
+//					}
+//				}
+//			}
+//			peer.listAllPeers(function(list) {
+//				console.log(list);
+//				if(list.length > 1) {
+//					list.forEach();
+//				}
+//			});
+/*			// 自機とエネミーショットとの衝突判定
+			for (i = 0; i < ENEMY_SHOT_MAX_COUNT; i++) {
+				// エネミーショットの生存フラグをチェック
+				if (enemyShot[i].alive) {
+					// 自機とエネミーショットとの距離を計測
+					p = chara.position.distance(enemyShot[i].position);
+					if (p.length() < chara.size) {
+						if(chara.life > 0){
+							enemyShot[i].alive = false;
+							buin00.play();
+							chara.life--;
+						}else{
+							// 衝突していたら生存フラグを降ろす
+							chara.alive = false;
+							// 衝突があったのでパラメータを変更してループを抜ける
+							run = false;
+							explosion.play();
+							message = 'GAME OVER';
+							message2 = 'Press Enter key to restart';
+							break;
+						}
+					}
+				}
+			}*/
+			
+			
+			
+			
 			context.fillStyle = "rgb(255,255,255)";// 白に設定。
 			context.clearRect(0,0,canvasWidth,canvasHeight);// 塗りつぶし。
 			if(myIcon) {

@@ -36,23 +36,21 @@ function setMyStream(stream) {
 	myStream = stream;
 	console.log(stream);
 	console.log(myStream);
-	peer.listAllPeers(function(list) {
-		console.dir(list);
-
-		if(list.length > 1){
-			console.dir(list);
-
-			list.forEach(function(id) {
-				if(id != peer.id){
-					console.log(id);
-					console.log(myStream);
-					var call = peer.call(id, myStream);//idで指定されたリモートのpeerへ発信し、mediaconnectionを返す。
-					console.log(call);
-					call.on('stream', receiveOthersStream);//リモートのpeerがstreamを追加したときに発生します。
-				}
-			});
-		}
-	});
+//	peer.listAllPeers(function(list) {
+//		console.dir(list);
+//		if(list.length > 1){
+//			console.dir(list);
+//			list.forEach(function(id) {
+//				if(id != peer.id){
+//					console.log(id);
+//					console.log(myStream);
+//					var call = peer.call(id, myStream);//idで指定されたリモートのpeerへ発信し、mediaconnectionを返す。
+//					console.log(call);
+//					call.on('stream', receiveOthersStream);//リモートのpeerがstreamを追加したときに発生します。
+//				}
+//			});
+//		}
+//	});
 };
 
 var receiveOthersStream = function (stream) { //相手の動画を表示する為の
@@ -67,6 +65,9 @@ var receiveOthersStream = function (stream) { //相手の動画を表示する�
 };
 
 peer.on('open', function () {
+	myIcon.peerId = peer.id;
+	console.log(myIcon.peerId);
+	socket.emit('emit_from_client_join', myIcon);
 //	$('#peer-id').text(id);
 //	peer.listAllPeers(function(list) {
 //		console.dir(list);

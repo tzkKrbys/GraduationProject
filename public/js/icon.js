@@ -14,6 +14,8 @@ function MyIcon(){
 	this.str;//チャットで発言した文字
 	this.countVoice;//発言した文字が消えるまでのカウントダウン
 	this.iconImg;//アイコン画像用
+	this.peerId;//skywayのpeer.id
+	this.talkingNodes = [];
 }
 
 /*初期化関数*/
@@ -170,6 +172,8 @@ function OtherIcon(){
 	this.str;//チャットで発言した文字
 	this.countVoice;//発言した文字が消えるまでのカウントダウン
 	this.iconImg;//アイコン画像用
+	this.peerId;//skywayのpeer.id
+	this.talkingCount;
 }
 
 /*初期化関数*/
@@ -180,6 +184,7 @@ OtherIcon.prototype.Init = function(x,y){//引数にx,yの初期位置を渡す
 	this.AddNumY = 4;
 	this.iconImg = new Image();
 	this.iconImg.src = "../img/son.png";//アイコン画像を渡す
+	this.talkingCount = 0;
 }
 
 OtherIcon.fromObject = function(obj, x, y) {
