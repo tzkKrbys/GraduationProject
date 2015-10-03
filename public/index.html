@@ -8,7 +8,66 @@
 
 	<!--		<script src="js/mic.js"></script>-->
 	<meta name="viewport" content="width=device-width initial-scale=1.0">
-	
+<!--	< script src = "https://skyway.io/dist/0.3/peer.js" ></script>-->
+	<style>
+		#video {
+			width: 400px;
+			height: 300px;
+			position: fixed;
+			top: 0;
+			left: 0;
+			
+		}
+	</style>
+	<script>
+//		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+//
+//var myStream;
+////var peer = new Peer({key: 'u60h2h5eb9ms4i'});//peerjsのサイトで取得したAPI KEYを指定（クラウド上のPeerServerを利用するためのAPIキーです。）var peer = new Peer([id], [options]);[id]string他のピアがこのピアへ接続するときに使われるIDです。もしIDが指定されない場合、ブローカサーバがIDを生成します。
+//var peer = new Peer({
+//	key: '9c3b3585-c22d-4012-951a-cda1997a691b'
+//});
+//var setOthersStream = function (stream) { //相手の動画を表示する為の
+//	$('#others-video').prop('src', URL.createObjectURL(stream));
+//};
+//
+//var setMyStream = function (stream) {
+//	myStream = stream;
+//	$('#video').prop('src', URL.createObjectURL(stream)); //URL.createObjectURL()はFileオブジェクトを引数に指定することでページ内で利用できるオブジェクトのURLを生成します。生成されたオブジェクトURLはページを閉じた際に破棄されます。オブジェクトURLは動画や音声ファイルなどを直接表示する際に有効でしょう
+//};
+//
+//peer.on('open', function (id) { //peer.on('open', function(id) { ... });onメソッドはpeerイベントのリスナを設定します。idはブローカーIDです（コンストラクタで指定されるか、サーバによって割付けされます）。
+//	$('#peer-id').text(id);
+//});
+//
+//peer.on('call', function (call) { //peer.on('call', function(mediaConnection) { ... });リモートのpeerがあなたに発信してきたときに発生します。mediaConnectionはこの時点でアクティブではありません。つまり、最初に応答する必要があります（mediaConnection.answer([stream]);）。その後、streamイベントをlistenできます。
+//	call.answer(myStream);
+//	call.on('stream', setOthersStream);
+//});
+//
+//$(function () {
+//	navigator.getUserMedia({//navigator.getUserMedia ( constraints, successCallback, errorCallback );
+//		audio: true,
+//		video: true
+//	}, setMyStream, function () {});
+//
+//	$('#call').on('click', function () {
+//		var call = peer.call($('#others-peer-id').val(), myStream);
+//		console.log(call);
+//		call.on('stream', setOthersStream);
+//	});
+//});
+//
+//peer.on('error', function (e) {
+//	console.log(e.message);
+//});
+///*document.addEventListener('click',function(event){
+//				var text = prompt('コメントを入力してください');
+//				if(text){
+//
+//				}
+//				})*/
+</script>
 </head>
 
 <body>
@@ -24,11 +83,18 @@
 				<input type="reset" id="clearBtn" value="クリア">
 			</form>
 		</div>
+		<video id="video" class="videoWindow" autoplay ></video>
+		<audio id="audio"></audio>
 	</div>
 	<!--end#wrapper-->
 	<script src="./js/jquery-2.1.4.min.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="./js/icon.js"></script>
 	<script src="./js/main.js"></script>
+<!--	<script src="http://cdn.peerjs.com/0.3/peer.min.js"></script>-->
+<!--	<script type="text/javascript" src="http://cdn.peerjs.com/0.3/peer.min.js"></script>-->
+<!--	<script src="./js/peer.js"></script>-->
+	<script src="https://skyway.io/dist/0.3/peer.js"></script>
+	<script src="./js/voiceChat.js"></script>
 </body>
 </html>

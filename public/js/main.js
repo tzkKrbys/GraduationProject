@@ -19,6 +19,7 @@ var myUniqueId;
 
 
 $(document).ready(function(){
+	console.log(peer);
 //	function init() {//初期化関数
 		// canvasに代入
 		canvas = document.getElementById('canvas');
