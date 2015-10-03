@@ -20,91 +20,89 @@ var myUniqueId;
 
 $(document).ready(function(){
 	console.log(peer);
-//	function init() {//初期化関数
-		// canvasに代入
-		canvas = document.getElementById('canvas');
-		context = canvas.getContext('2d');
-		canvasWidth = canvas.width;
-		canvasHeight = canvas.height;
-		// canvas非対応
-		if (!canvas || !canvas.getContext) {
-			alert("html5に対応していないので、実行できません");
-			return false;
-		}
-		// キーの登録
-		window.addEventListener('keydown', KeyDown, true); //キーを押した時、呼び出される関数を指定
-		window.addEventListener('keyup', KeyUp, true); //キーを離した時、呼び出される関数を指定
-	
-		//キーを押した時
-		function KeyDown(event) {
-			var code = event.keyCode;       // どのキーが押されたか
-			switch(code) {
-				case 37:// ←キー
-					gBLeftPush = true;
-					break;
-				case 39:// →キー
-					gBRightPush = true;
-					break;
-				case 38:// ↑キー
-					gBUpPush = true;
-					break;
-				case 40:// ↓キー
-					gBDownPush = true;
-					break;
-				case 13:
-					if (event.shiftKey) { // Shiftキーも押された
-						event.preventDefault();
-						myIcon.SendChat();
-						socket.emit('emit_from_client_sendMsg', {str: myIcon.str, chatShowCount: myIcon.chatShowCount});
-					}
-			}
-		}
+	canvas = document.getElementById('canvas');
+	context = canvas.getContext('2d');
+	canvasWidth = canvas.width;
+	canvasHeight = canvas.height;
+	// canvas非対応
+	if (!canvas || !canvas.getContext) {
+		alert("html5に対応していないので、実行できません");
+		return false;
+	}
+	// キーの登録
+	window.addEventListener('keydown', KeyDown, true); //キーを押した時、呼び出される関数を指定
+	window.addEventListener('keyup', KeyUp, true); //キーを離した時、呼び出される関数を指定
 
-		//キーを離した時
-		function KeyUp(event) {
-			code = event.keyCode;
-			switch(code) {
-				case 37:// ←キー
-					gBLeftPush = false;
-					break;
-				case 39:// →キー
-					gBRightPush = false;
-					break;
-				case 38:// ↑キー
-					gBUpPush = false;
-					break;
-				case 40:// ↓キー
-					gBDownPush = false;
-					break;
-			}
+	//キーを押した時
+	function KeyDown(event) {
+		var code = event.keyCode;       // どのキーが押されたか
+		switch(code) {
+			case 37:// ←キー
+				gBLeftPush = true;
+				break;
+			case 39:// →キー
+				gBRightPush = true;
+				break;
+			case 38:// ↑キー
+				gBUpPush = true;
+				break;
+			case 40:// ↓キー
+				gBDownPush = true;
+				break;
+			case 13:
+				if (event.shiftKey) { // Shiftキーも押された
+					event.preventDefault();
+					myIcon.SendChat();
+					socket.emit('emit_from_client_sendMsg', {str: myIcon.str, chatShowCount: myIcon.chatShowCount});
+				}
 		}
+	}
 
-	//-------------------------------------マイク取得
-		//エラー処理
-		var errBack = function(e){
-			console.log("Web Audio error:",e.code);
-		};
-		//WebAudioリクエスト成功時に呼び出されるコールバック関数
-		function gotStream(stream){
-			//streamからAudioNodeを作成
-			var mediaStreamSource = audioContext.createMediaStreamSource(stream);
-			mediaStreamSource.connect(filter);
-			console.log(mediaStreamSource);
-			console.log(mediaStreamSource.connect());
-			filter.connect(analyser);
-			//出力Nodeのdestinationに接続
-			analyser.connect(audioContext.destination);
-			//mediaStreamSource.connect(audioContext.destination);
+	//キーを離した時
+	function KeyUp(event) {
+		code = event.keyCode;
+		switch(code) {
+			case 37:// ←キー
+				gBLeftPush = false;
+				break;
+			case 39:// →キー
+				gBRightPush = false;
+				break;
+			case 38:// ↑キー
+				gBUpPush = false;
+				break;
+			case 40:// ↓キー
+				gBDownPush = false;
+				break;
 		}
-		var audioObj = {"audio":true};
-		//マイクの有無を調べる
-		if(navigator.webkitGetUserMedia){
-			//マイク使って良いか聞いてくる
-			navigator.webkitGetUserMedia(audioObj,gotStream,errBack);
-		}else{
-			console.log("マイクデバイスがありません");
-		}
-	//-------------------------------------マイク取得
+	}
+
+//	//-------------------------------------マイク取得
+//	//エラー処理
+//	var errBack = function(e){
+//		console.log("Web Audio error:",e.code);
+//	};
+//	//WebAudioリクエスト成功時に呼び出されるコールバック関数
+//	function gotStream(stream){
+//		//streamからAudioNodeを作成
+//		var mediaStreamSource = audioContext.createMediaStreamSource(stream);
+//		mediaStreamSource.connect(filter);
+//		console.log(mediaStreamSource);
+//		console.log(mediaStreamSource.connect());
+//		filter.connect(analyser);
+//		//出力Nodeのdestinationに接続
+//		analyser.connect(audioContext.destination);
+//		//mediaStreamSource.connect(audioContext.destination);
+//	}
+//	var audioObj = {"audio":true};
+//	//マイクの有無を調べる
+//	if(navigator.webkitGetUserMedia){
+//		//マイク使って良いか聞いてくる
+//		navigator.webkitGetUserMedia(audioObj,gotStream,errBack);
+//	}else{
+//		console.log("マイクデバイスがありません");
+//	}
+//	//-------------------------------------マイク取得
 
 
 
@@ -336,7 +334,7 @@ $(document).ready(function(){
 							if(icon.peerId){
 								var diffX = icon.PosX - myIcon.PosX;
 								var diffY = icon.PosY - myIcon.PosY;
-								if((diffX * diffX) + (diffY * diffY) < 140 * 140){
+								if((diffX * diffX) + (diffY * diffY) < 140 * 140){//距離判定
 									console.log('いえい');
 									if(myIcon.talkingNodes.length < 1 && icon.talkingNodes < 1){
 										console.log(myIcon.talkingNodes);
@@ -363,7 +361,6 @@ $(document).ready(function(){
 										if(node.uniqueId == icon.uniqueId) {
 											node.call.close();
 											arr.splice(i,1);
-
 										}
 									});
 								}
@@ -372,60 +369,9 @@ $(document).ready(function(){
 					}
 				}
 			}
-//			if(myIcon) {
-//				if(myIcon.talkingCount < 1 ){
-//					console.log(myIcon.talkingCount);
-//					if(icons.length > 0) {
-//						icons.forEach(function(icon) {
-//							if(icon.talkingCount > 0 ) return;
-//							var diffX = icon.PosX - myIcon.PosX;
-//							var diffY = icon.PosY - myIcon.PosY;
-//							if((diffX * diffX) + (diffY * diffY) < 140 * 140){
-//								console.log('いえい');
-//							}else{
-//								var call = peer.call(icon.peerId, myStream);
-//								call.on('stream', receiveOthersStream);
-//								talkingNode.push(call);
-//								myIcon.talkingCount++;
-//							}
-//						});
-//					}
-//				}
-//			}
-//			peer.listAllPeers(function(list) {
-//				console.log(list);
-//				if(list.length > 1) {
-//					list.forEach();
-//				}
-//			});
-/*			// 自機とエネミーショットとの衝突判定
-			for (i = 0; i < ENEMY_SHOT_MAX_COUNT; i++) {
-				// エネミーショットの生存フラグをチェック
-				if (enemyShot[i].alive) {
-					// 自機とエネミーショットとの距離を計測
-					p = chara.position.distance(enemyShot[i].position);
-					if (p.length() < chara.size) {
-						if(chara.life > 0){
-							enemyShot[i].alive = false;
-							buin00.play();
-							chara.life--;
-						}else{
-							// 衝突していたら生存フラグを降ろす
-							chara.alive = false;
-							// 衝突があったのでパラメータを変更してループを抜ける
-							run = false;
-							explosion.play();
-							message = 'GAME OVER';
-							message2 = 'Press Enter key to restart';
-							break;
-						}
-					}
-				}
-			}*/
-			
-			
-			
-			
+
+
+
 			context.fillStyle = "rgb(255,255,255)";// 白に設定。
 			context.clearRect(0,0,canvasWidth,canvasHeight);// 塗りつぶし。
 			if(myIcon) {
@@ -433,7 +379,12 @@ $(document).ready(function(){
 				myIcon.DrawChat(); //myIconオブジェクトの描画メソッド呼出
 				if(myIcon.countVoice){
 					context.globalAlpha = myIcon.countVoice * 3 / 1000;
-					context.fillStyle = "#ff0";
+					console.log(myIcon.talkingNodes.length);
+					if(myIcon.talkingNodes.length > 0) {
+						context.fillStyle = "#0f0";
+					}else{
+						context.fillStyle = "#ff0";
+					}
 					context.beginPath();
 					//円の設定（X中心軸,Y中心軸、半径、円のスタート度、円のエンド度、回転）
 					//		context.arc(oldX, oldY, Math.sqrt(Math.pow(px, 2) + Math.pow(py, 2)), 0, Math.PI * 2, false); // full circle
@@ -500,13 +451,13 @@ $(document).ready(function(){
 
 
 
-	var audioContext = new webkitAudioContext();
-	//フィルター
-	var filter = audioContext.createBiquadFilter();
-	filter.type = 0;
-	filter.frequency.value = 440;
-	//analyserオブジェクトの生成
-	var analyser = audioContext.createAnalyser();
+//	var audioContext = new webkitAudioContext();
+//	//フィルター
+//	var filter = audioContext.createBiquadFilter();
+//	filter.type = 0;
+//	filter.frequency.value = 440;
+//	//analyserオブジェクトの生成
+//	var analyser = audioContext.createAnalyser();
 
 
 });
