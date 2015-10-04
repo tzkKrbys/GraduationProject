@@ -9,7 +9,7 @@ var gBRightPush = false;	// right
 var gBUpPush = false;		// up
 var gBDownPush = false;	// down
 var myIcon;
-var otherIcon;
+//var otherIcon;
 var icons = [];
 
 var socket;
@@ -138,12 +138,12 @@ $(document).ready(function(){
 		});
 
 		
-		socket.on('emit_from_server_iconMove', function(data) {
-			if(otherIcon){
-				otherIcon.PosX = data.PosX;
-				otherIcon.PosY = data.PosY;
-			}
-		});
+//		socket.on('emit_from_server_iconMove', function(data) {
+//			if(otherIcon){
+//				otherIcon.PosX = data.PosX;
+//				otherIcon.PosY = data.PosY;
+//			}
+//		});
 		
 		socket.on('emit_from_server_iconRemove', function(data){
 			icons.forEach(function(icon, i, icons) {
@@ -321,12 +321,51 @@ $(document).ready(function(){
 				}
 			});
 		});
+		socket.on('emit_from_server_peerCallConnected', function(data) {
+			icons.forEach(function (icon, i, icons) {
+				if(icon.uniqueId == data.uniqueId) {
+					if(!icons[i].talkingNodesIds.length) {
+						console.log(data);
+						console.log(icons[i].talkingNodesIds);
+						icons[i].talkingNodesIds.push(data.talkingNodesIds);
+						console.log(icons[i].talkingNodesIds);
+					}else{
+						icons[i].talkingNodesIds.forEach(function(id) {
+							if(id != data.uniqueId) return;
+							console.log(data);
+							console.log(icons[i].talkingNodesIds);
+							icons[i].talkingNodesIds.push(data.talkingNodesIds);
+							console.log(data.talkingNodesIds);
+						});
+					}
+				}
+			});
+		});
+		socket.on('emit_from_server_peerCallDisconnected', function(data) {
+			icons.forEach(function (icon, i, icons) {
+				if(icon.uniqueId == data.uniqueId) {
+					if(icons[i].talkingNodesIds.length) {
+						icons[i].talkingNodesIds.forEach(function(id,j,arr) {
+							console.log(id);
+							console.log(data.talkingNodesIds);
+							console.log(data.uniqueId);
+							console.log(arr);
+							if(id == data.talkingNodesIds) {
+								arr.splice(j,1);
+								console.log(arr);
+							}
+						});
+					}
+				}
+			});
+		});
+		
 		
 		//	Draw
 		//	描画
 
 		function Draw(){
-			
+				
 			if( countFrames % 30 == 0 ) {
 				if(myIcon && peer && myStream) {
 					if(icons.length > 0) {
@@ -335,32 +374,31 @@ $(document).ready(function(){
 								var diffX = icon.PosX - myIcon.PosX;
 								var diffY = icon.PosY - myIcon.PosY;
 								if((diffX * diffX) + (diffY * diffY) < 140 * 140){//距離判定
-									console.log('いえい');
 									if(myIcon.talkingNodes.length < 1 && icon.talkingNodes < 1){
-										console.log(myIcon.talkingNodes);
-										var call = peer.call(icon.peerId, myStream);
-										console.log(icon.peerId);
-										console.log(myStream);
-										console.log(call);
-										call.on('stream', receiveOthersStream);
-										myIcon.talkingNodes.push({uniqueId: icon.uniqueId, call: call });
-										//								myIcon.talkingNodes.forEach(function(node) {
-		//									console.log('ので');
-		//									console.log(myIcon.talkingNodes);
-		//									console.log(node);
-		//									if(node.uniqueId != icon.uniqueId) {
-		//										var call = peer.call(icon.peerId, myStream);
-		//										call.on('stream', receiveOthersStream);
-		//										myIcon.talkingNodes.push({uniqueId: icon.uniqueId, call: call });
-		//									}
-		//								});
+										if(myIcon.talkingNodes.length) {
+											myIcon.talkingNodes.forEach(function(node, i, arr) {
+												if(node.uniqueId != icon.uniqueId) {
+													return;
+												} else {//接続する
+													var call = peer.call(icon.peerId, myStream);
+													call.on('stream', receiveOthersStream);
+													myIcon.talkingNodes.push({uniqueId: icon.uniqueId, call: call });
+													socket.emit('emit_from_client_peerCallConnected', icon.uniqueId);
+												}
+											});
+										} else {//接続する
+											var call = peer.call(icon.peerId, myStream);
+											call.on('stream', receiveOthersStream);
+											myIcon.talkingNodes.push({uniqueId: icon.uniqueId, call: call });
+											socket.emit('emit_from_client_peerCallConnected', icon.uniqueId);
+										}
 									}
 								}else{
-									console.log('のー');
 									myIcon.talkingNodes.forEach(function(node, i, arr) {
-										if(node.uniqueId == icon.uniqueId) {
+										if(node.uniqueId == icon.uniqueId) {//切断する
 											node.call.close();
 											arr.splice(i,1);
+											socket.emit('emit_from_client_peerCallDisconnected', icon.uniqueId);
 										}
 									});
 								}
@@ -379,7 +417,7 @@ $(document).ready(function(){
 				myIcon.DrawChat(); //myIconオブジェクトの描画メソッド呼出
 				if(myIcon.countVoice){
 					context.globalAlpha = myIcon.countVoice * 3 / 1000;
-					console.log(myIcon.talkingNodes.length);
+//					console.log(myIcon.talkingNodes.length);
 					if(myIcon.talkingNodes.length > 0) {
 						context.fillStyle = "#0f0";
 					}else{
@@ -402,7 +440,13 @@ $(document).ready(function(){
 				icon.DrawChat(); //myIconオブジェクトの描画メソッド呼出(CanvasRenderingContext2Dオブジェクト,str)
 				if(icon.countVoice){
 					context.globalAlpha = icon.countVoice * 3 / 1000;
-					context.fillStyle = "#ff0";
+					console.log(icon.talkingNodesIds.length);
+					if(icon.talkingNodesIds.length > 0) {
+						context.fillStyle = "#0f0";
+					}else{
+						context.fillStyle = "#ff0";
+					}
+//					context.fillStyle = "#ff0";
 					context.beginPath();
 					//円の設定（X中心軸,Y中心軸、半径、円のスタート度、円のエンド度、回転）
 					//		context.arc(oldX, oldY, Math.sqrt(Math.pow(px, 2) + Math.pow(py, 2)), 0, Math.PI * 2, false); // full circle

@@ -137,6 +137,17 @@ io.sockets.on('connection', function (socket) {
 		socket.broadcast.emit('emit_from_server_voicePU', { uniqueId: socket.id ,countVoice: data});
 	});
 	
+	
+	socket.on('emit_from_client_peerCallConnected', function(data) {
+		console.log(data);
+		socket.broadcast.emit('emit_from_server_peerCallConnected', {uniqueId: socket.id, talkingNodesIds: data});
+	});
+
+	socket.on('emit_from_client_peerCallDisconnected', function(data) {
+		console.log(data);
+		socket.broadcast.emit('emit_from_server_peerCallDisconnected', {uniqueId: socket.id, talkingNodesIds: data});
+	});
+	
 	socket.on('disconnect', function() {
 		console.log(socket.id);
 		console.log('disconnect');
