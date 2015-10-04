@@ -502,5 +502,4 @@ $(document).ready(function(){
 //	//analyserオブジェクトの生成
 //	var analyser = audioContext.createAnalyser();
 
-
 });
